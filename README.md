@@ -1,14 +1,28 @@
 # pyrus-decision-tree
 Decision Tree written in Rust, with Python bindings
 
-## Extremely fast and efficient Decision Tree written in Rust 
+## Extremely _slow_ Decision Tree written in Rust 
+
+Have you found yourself yerning for a _slower_ version of Scikit-Learn's
+`DecisionTreeClassifier` with less features? 
+
+You've come to the right place.
+
+This was a weekend project and I've botched the implementation somewhere,
+probably in the splitter logic for tree nodes, so while it's written
+entirely in Rust and requires no dependencies; it manages to do a lot
+of inefficient logic, very quickly.
+
+On a handful of testing data, with equivelent parameters, it yields 
+the same results, only much, much slower. 
 
 *This is currently the first release and the tree only implements 
 the `scikit-learn` API's `fit(X, y)` and `predict(X)` methods as of now, 
 and only as a classifier (no regression tree yet)*
 
-In a short time, it should be a drop-in replacement for both 
-`DecisionTreeClassifier` and `DecisionTreeRegressor` :-)
+
+Maybe I'll get back to fixing it, maybe not. 
+
 
 ---
 
