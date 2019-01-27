@@ -99,6 +99,7 @@ impl Node {
             Node {
                 gini, depth, split_value, split_index, left_child_node: None, right_child_node: None, target
             }
+
         } else {
 
             let (left, right): (Vec<&Sample>, Vec<&Sample>) = split_into_groups(split_index, split_value, &dataset);
@@ -154,7 +155,6 @@ pub struct DecisionTree {
     max_depth: usize,
 }
 
-
 impl DecisionTree {
 
     pub fn new(max_depth: usize) -> DecisionTree {
@@ -175,7 +175,6 @@ impl DecisionTree {
         let root_node = Node::new(1, self.max_depth, &dataset);
 
         self.root_node = root_node;
-
         Ok(())
     }
 
@@ -186,4 +185,37 @@ impl DecisionTree {
             .collect::<Vec<i32>>()
     }
 
+}
+
+#[pyclass]
+#[derive(Default, Clone, Serialize, Deserialize, Debug)]
+pub struct PyrusDecisionTree {
+    model: DecisionTree
+}
+
+#[pymethods]
+impl PyrusDecisionTree {
+
+    #[new]
+    pub fn __new__(obj: &PyRawObject, max_depth: usize) -> PyResult<()> {
+        obj.init(|_| PyrusDecisionTree {
+            model: DecisionTree::new(max_depth)
+        })?;
+        Ok(())
+    }
+
+    pub fn fit(&mut self, x: Vec<Vec<Number>>, y: Vec<i32>) -> PyResult<()> {
+        self.model.fit(x, y)
+    }
+
+    pub fn predict(&self, x: Vec<Vec<Number>>) -> PyResult<Vec<i32>> {
+        Ok(self.model.predict(x))
+    }
+
+}
+
+#[pymodinit]
+pub fn pyrus_decision_tree(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<PyrusDecisionTree>()?;
+    Ok(())
 }
