@@ -10,5 +10,11 @@ Cargo.lock
 **/*.rs.bk
 
 .idea/
+.eggs/
+dist/
+pyrust_decision_tree.egg-info/
+venv/
 
 **/*/__pycache__/
+pyrus_decision_tree/_version.py
+**/*.so

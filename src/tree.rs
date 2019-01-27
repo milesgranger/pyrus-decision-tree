@@ -1,9 +1,11 @@
 
 use std::f32;
+use std::time::{Duration, Instant};
 
 use pyo3::prelude::*;
 use stats;
 use itertools::{Itertools, Either};
+use rayon::prelude::*;
 
 use crate::cost_funcs;
 
@@ -29,6 +31,8 @@ fn split_into_groups<'b>(index: usize, value: Number, dataset: &'b Vec<&Sample>)
 // Returns a tuple of (best feature split index, best feature split value, best gini)
 // will panic if any sample does not have an assigned class
 fn best_split(x: &Vec<&Sample>) -> (usize, Number, f32) {
+    //let now = Instant::now();
+
     let classes: Vec<i32> = x
         .iter()
         .map(|s| s.class.expect("Does not have an assigned class!"))
@@ -38,8 +42,7 @@ fn best_split(x: &Vec<&Sample>) -> (usize, Number, f32) {
 
     let n_features = x[0].data.len();
 
-    // TODO: Optimize this to build intermediate collections which equals the size of the dataset
-    let mut gini_splits = x.iter()
+    let mut gini_splits = x.par_iter()
         .map(|sample| {
             (0..n_features)
                 .map(|idx| {
@@ -53,6 +56,7 @@ fn best_split(x: &Vec<&Sample>) -> (usize, Number, f32) {
         .collect::<Vec<(usize, Number, f32)>>();
 
     gini_splits.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap());
+    //println!("Finished best_split in {}ms", now.elapsed().as_millis());
     gini_splits[0]
 }
 
@@ -84,8 +88,8 @@ impl Node {
     pub fn new(depth: usize, max_depth: usize, dataset: &Vec<&Sample>) -> Node {
         let (split_index, split_value, gini): (usize, Number, f32) = best_split(&dataset);
 
-        // No more growing if we're at the max depth.
-        if max_depth == depth {
+        // No more growing if we're at the max depth, or min samples
+        if max_depth == depth || dataset.len() < 3 {
 
             // Calculate the target of this node
             let modes = stats::modes(dataset.iter().map(|sample| sample.class.unwrap()));
@@ -168,13 +172,16 @@ impl DecisionTree {
             .map(|(sample, target)| Sample::new(sample, Some(target)))
             .collect::<Vec<Sample>>();
 
+        let now = Instant::now();
         let dataset = x
             .iter()
             .collect::<Vec<&Sample>>();
 
+        let now = Instant::now();
         let root_node = Node::new(1, self.max_depth, &dataset);
 
         self.root_node = root_node;
+
         Ok(())
     }
 

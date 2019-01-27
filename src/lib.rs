@@ -1,4 +1,4 @@
-#![feature(specialization)]
+#![feature(specialization, duration_as_u128)]
 
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate derive_more;

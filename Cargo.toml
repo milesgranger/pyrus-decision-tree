@@ -19,4 +19,5 @@ derive_more = "^0.13"
 float-cmp = "^0.4"
 itertools = "^0.8.0"
 streaming-stats = "0.2.2"
+rayon = "^1.0"
 pyo3 = { version = "^0.5", features = ["extension-module"] }
